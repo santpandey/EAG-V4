@@ -348,6 +348,8 @@ if __name__ == "__main__":
     # Check if running with mcp dev command
     print("STARTING")
     if len(sys.argv) > 1 and sys.argv[1] == "dev":
+        print("RUNNING IN DEV MODE")
         mcp.run()  # Run without transport for dev server
     else:
+        print("RUNNING IN PRODUCTION MODE")
         mcp.run(transport="stdio")  # Run with stdio for direct execution
