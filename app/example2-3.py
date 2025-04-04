@@ -6,6 +6,7 @@ from mcp import types
 from PIL import Image as PILImage
 import math
 import sys
+import pywinauto
 from pywinauto.application import Application
 import win32gui
 import win32con
@@ -172,7 +173,7 @@ async def draw_rectangle(x1: int, y1: int, x2: int, y2: int) -> dict:
         paint_window = paint_app.window(class_name='MSPaintApp')
         
         # Get primary monitor width to adjust coordinates
-        primary_width = GetSystemMetrics(0)
+        #primary_width = GetSystemMetrics(0)
         
         # Ensure Paint window is active
         if not paint_window.has_focus():
@@ -180,26 +181,70 @@ async def draw_rectangle(x1: int, y1: int, x2: int, y2: int) -> dict:
             time.sleep(0.2)
         
         # Click on the Rectangle tool using the correct coordinates for secondary screen
-        paint_window.click_input(coords=(530, 82 ))
+        #paint_window.click_input(coords=(513, 130 ))
+        paint_window.type_keys("+t")
         time.sleep(0.2)
+        #pywinauto.mouse.move_mouse_input(coords=(0, 400))
+        #time.sleep(0.5)
         
         # Get the canvas area
         canvas = paint_window.child_window(class_name='MSPaintView')
-        
+        canvas.set_focus()
+        canvas.type_keys("+t")
+        time.sleep(0.2)
         # Draw rectangle - coordinates should already be relative to the Paint window
         # No need to add primary_width since we're clicking within the Paint window
-        canvas.press_mouse_input(coords=(x1+2560, y1))
-        canvas.move_mouse_input(coords=(x2+2560, y2))
-        canvas.release_mouse_input(coords=(x2+2560, y2))
+        #canvas.press_mouse_input(coords=(x1+100, y1))
+        canvas.press_mouse_input(coords=(x1, y1))
+        #canvas.move_mouse_input(coords=(x2+100, y2))
+        #canvas.move_mouse_input(coords=(x2+100, y2))
+        #canvas.move_mouse_input(coords=(x2+100, y2))
+        #canvas.move_mouse_input(coords=(x2+100, y2))
+        canvas.drag_mouse_input(dst=(x2, y1), src=(x1, y1))
+        canvas.drag_mouse_input(dst=(x2, y2), src=(x2, y1))
+        canvas.drag_mouse_input(dst=(x1, y2), src=(x2, y2))
+        canvas.drag_mouse_input(dst=(x1, y1), src=(x1, y2))
+        #canvas.release_mouse_input(coords=(x2+100, y2))
+        canvas.release_mouse_input(coords=(x1, y1))
+
+        #canvas.press_mouse_input(coords=(x1+100, y1))
+        #canvas.drag_input(dst=(x2+100, y2))
+        #canvas.release_mouse_input(coords=(x2+100, y2))
+        #paint_window.type_keys("+t")
+        # Draw a rectangle
+        #canvas.press_mouse_input(coords=(576, 463))
+        #canvas.move_mouse_input(coords=(781, 609))
+        #canvas.release_mouse_input(coords=(781, 609))
         
         return {
             "content": [
                 TextContent(
                     type="text",
-                    text=f"Rectangle drawn from ({x1},{y1}) to ({x2},{y2})"
+                    text=f"Rectangle drawn from ({x1},{y1}) to ({x2},{y2})",
+                    canvas=canvas
                 )
             ]
         }
+    except Exception as e:
+        return {
+            "content": [
+                TextContent(
+                    type="text",
+                    text=f"Error drawing rectangle: {str(e)}"
+                )
+            ]
+        }
+               
+    except Exception as e:
+        return {
+            "content": [
+                TextContent(
+                    type="text",
+                    text=f"Error drawing rectangle: {str(e)}"
+                )
+            ]
+        }
+        
     except Exception as e:
         return {
             "content": [
@@ -233,9 +278,11 @@ async def add_text_in_paint(text: str) -> dict:
             paint_window.set_focus()
             time.sleep(0.5)
         
+        
+
         # Click on the Rectangle tool
-        paint_window.click_input(coords=(528, 92))
-        time.sleep(0.5)
+        #paint_window.click_input(coords=(798, 515))
+        #time.sleep(0.5)
         
         # Get the canvas area
         canvas = paint_window.child_window(class_name='MSPaintView')
@@ -247,7 +294,7 @@ async def add_text_in_paint(text: str) -> dict:
         time.sleep(0.5)
         
         # Click where to start typing
-        canvas.click_input(coords=(810, 533))
+        canvas.click_input(coords=(798, 517))
         time.sleep(0.5)
         
         # Type the text passed from client
@@ -277,26 +324,122 @@ async def add_text_in_paint(text: str) -> dict:
 
 @mcp.tool()
 async def open_paint() -> dict:
-    """Open Microsoft Paint maximized on secondary monitor"""
+    """Open Microsoft Paint"""
     global paint_app
     try:
         paint_app = Application().start('mspaint.exe')
-        time.sleep(0.2)
+        time.sleep(2)
         
         # Get the Paint window
         paint_window = paint_app.window(class_name='MSPaintApp')
+        #time.sleep(1)
+        #paint_window.type_keys("%f")
+        #time.sleep(2)
+        #paint_window.type_keys("^e")
+        #time.sleep(3)
+        #properties_dialogue = paint_window.child_window(title='Image Properties', control_type='Window')
+        #properties_dialogue.wait('ready', timeout=10)
         
+        #if properties_dialogue.exists():
+        #    image_size_group = properties_dialogue.child_window(title='Image size', control_type='Group')
+        #    width_edit = image_size_group.child_window(title='Width:', control_type='Edit')
+        #    height_edit = image_size_group.child_window(title='Height:', control_type='Edit')
+        #    width_edit.set_focus()
+        #    width_edit.type_keys("{TAB}")
+        #    height_edit.set_focus()
+        #    height_edit.type_keys("{TAB}")
+
+        #if properties_dialogue.exists():
+        #    properties_dialogue.set_focus()
+        #    properties_dialogue.type_keys("{TAB}")
+        #    time.sleep(1)
+        #    properties_dialogue.type_keys("{TAB}")
+        #    time.sleep(1)
+        #    properties_dialogue.type_keys("{ENTER}")
+        #    time.sleep(1)
+        #if properties_dialogue.exists():
+        #    ok_button = properties_dialogue.child_window(title='OK', control_type='Button')
+        #    if ok_button.exists():
+        #        ok_button.click()
+        #        time.sleep(1)
+        
+            
+        #if properties_dialogue.exists():
+        #    cancel_button = properties_dialogue.child_window(title='Cancel', control_type='Button')
+        #    if cancel_button.exists():
+        #        cancel_button.click()
+        #        time.sleep(1)
+
+        #if properties_dialogue.exists():
+        #    close_button = properties_dialogue.child_window(title='Close', control_type='Button')
+        #    if close_button.exists():
+        #        close_button.click()
+        #        time.sleep(1)
+        #if properties_dialogue.exists():
+        #    win32gui.PostMessage(paint_window.handle, win32con.WM_CLOSE, 0, 0)                
+
+        #time.sleep(5)
+        #if properties_dialog.exists():
+        #    properties_dialog.type_keys("{ESC}")
+        #    time.sleep(0.5)
+        #    properties_dialog.type_keys("{ESC}")
+        # Find the width and height edit controls within the "Image Size" group.
+        # This part is more robust because it finds the controls relative to the group.
+
+        #image_size_group = properties_dialog.child_window(title="Image size", control_type="Group")
+        #width_edit = image_size_group.child_window(title="Width:", control_type="Edit")
+        #height_edit = image_size_group.child_window(title="Height:", control_type="Edit")
+
+        #width = width_edit.get_value()
+        #height = height_edit.get_value()
+
+        #print(f"Image Width: {width}")
+        #print(f"Image Height: {height}")
+
+        #properties_dialog.type_keys("%{F4}")
+        
+        #paint_window.set_focus()
+        #time.sleep(1)
+
+        #properties_dialog = paint_window.by(name='Image properties', control_type='Window').click()
         # Get primary monitor width
-        primary_width = GetSystemMetrics(0)
-        
+        #primary_width = GetSystemMetrics(0)
+
+        # Click on the File tab
+        #paint_window.child_window(title="File", control_type="TabItem").click()
+
+        # Click on Image Properties
+        #paint_window.child_window(title="Properties", control_type="MenuItem").invoke()
+
+        # Wait for the Properties dialog to appear
+        #properties_dialog = paint_window.child_window(title="Image properties", control_type="Window")
+
+        # Extract data from the dialog
+        #width_edit = properties_dialog.child_window(title="Width:", control_type="Edit")
+        #height_edit = properties_dialog.child_window(title="Height:", control_type="Edit")
+        #units_combo = properties_dialog.child_window(title="Units:", control_type="ComboBox")
+
+        #width = width_edit.get_value()  # Get width value
+        #height = height_edit.get_value()  # Get height value
+        #units = units_combo.get_value()  # Get selected units (e.g., pixels, inches)
+
+        #print(f"Width: {width}, Height: {height}")
+
+
+        # Get the canvas area
+        canvas = paint_window.child_window(class_name='MSPaintView')
+        time.sleep(1)
+        #width = canvas.rectangle().width()
+        #height = canvas.rectangle().height()
+    
         # First move to secondary monitor without specifying size
-        win32gui.SetWindowPos(
-            paint_window.handle,
-            win32con.HWND_TOP,
-            primary_width + 1, 0,  # Position it on secondary monitor
-            0, 0,  # Let Windows handle the size
-            win32con.SWP_NOSIZE  # Don't change the size
-        )
+        #win32gui.SetWindowPos(
+            #paint_window.handle,
+            #win32con.HWND_TOP,
+            #primary_width + 1, 0,  # Position it on secondary monitor
+            #0, 0,  # Let Windows handle the size
+            #win32con.SWP_NOSIZE  # Don't change the size
+        #)
         
         # Now maximize the window
         win32gui.ShowWindow(paint_window.handle, win32con.SW_MAXIMIZE)
@@ -306,7 +449,10 @@ async def open_paint() -> dict:
             "content": [
                 TextContent(
                     type="text",
-                    text="Paint opened successfully on secondary monitor and maximized"
+                    text="Paint opened successfully on secondary monitor and maximized",
+                    canvas=canvas,
+                    width=1200,
+                    height=720
                 )
             ]
         }
@@ -335,6 +481,50 @@ def review_code(code: str) -> str:
     return f"Please review this code:\n\n{code}"
     print("CALLED: review_code(code: str) -> str:")
 
+@mcp.tool()
+def extract_coordinates(data: list) -> list[int]:
+    """Extracts height and width from the list"""
+
+    try:
+        #start_width_index = data.find("width=") + len("width=")
+        #end_width_index = data.find(",", start_width_index)
+        width = int(data[1])
+
+        #start_height_index = data.find("height=") + len("height=")
+        #end_height_index = data.find(")]}", start_height_index)
+        height = int(data[0])
+
+        # Calculate coordinates for the rectangle
+        # Target area: 40-50% of the canvas
+        target_area_min_ratio = 0.4
+        target_area_max_ratio = 0.5
+
+        # Calculate approximate side lengths for the rectangle, aiming for the middle.
+        rect_width = int(width * 0.63)  # Adjusted factor to achieve ~45% area
+        rect_height = int(height * 0.71)  # Adjusted factor to achieve ~45% area
+
+        # Ensure rectangle dimensions don't exceed canvas
+        rect_width = min(rect_width, width)
+        rect_height = min(rect_height, height)
+
+        #x1 = (width - rect_width)   # Center horizontally
+        #y1 = (height - rect_height)
+        x1 = width
+        y1 = height/3  # Center vertically
+        #x2 = x1 + rect_width
+        x2 = x1+300
+        y2 = y1+300
+        #y2 = y1 + rect_height
+        result = [x1, y1, x2, y2]
+        return result
+
+    except (ValueError, AttributeError, TypeError) as e:
+        print(f"Error extracting height and width: {e}")
+        return None
+
+    
+
+
 
 @mcp.prompt()
 def debug_error(error: str) -> list[base.Message]:
@@ -344,12 +534,10 @@ def debug_error(error: str) -> list[base.Message]:
         base.AssistantMessage("I'll help debug that. What have you tried so far?"),
     ]
 
-if __name__ == "__main__":
-    # Check if running with mcp dev command
-    print("STARTING")
-    if len(sys.argv) > 1 and sys.argv[1] == "dev":
-        print("RUNNING IN DEV MODE")
-        mcp.run()  # Run without transport for dev server
-    else:
-        print("RUNNING IN PRODUCTION MODE")
-        mcp.run(transport="stdio")  # Run with stdio for direct execution
+
+if len(sys.argv) > 1 and sys.argv[1] == "dev":
+    print("RUNNING IN DEV MODE")
+    mcp.run()  # Run without transport for dev server
+else:
+    print("RUNNING IN PRODUCTION MODE")
+    mcp.run(transport="stdio")  # Run with stdio for direct execution
