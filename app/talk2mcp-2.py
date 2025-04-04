@@ -294,13 +294,19 @@ Available tools:
                         response = await generate_with_timeout(client, new_prompt)
                         method_name = response.text.strip()
 
-                        tool_to_determine = await session.call_tool(method_name, arguments={"data": response_text_height_weight})
-                        print(tool_to_determine)
-                        new_prompt_1= f"""I need you to extract 4 integers from {tool_to_determine}. Do note that result is an array having an object like TextContent(type='text', text='174', annotation=None). I need you to extract data from only text field, convert each of them to integer. Return only these 4 integers. Output should contain only 4 integers. Don't output any other code, docuemntation or any other text"""
-                        response = await generate_with_timeout(client, new_prompt_1)
+                        coordinate_call_response = await session.call_tool(method_name, arguments={"data": response_text_height_weight})
+                        print(coordinate_call_response)
+                        extract_coordinates_prompt= f"""I need you to extract 4 integers from {coordinate_call_response}. Do note that {coordinate_call_response} is an array having an object like TextContent(type='text', text='174', annotation=None). I need you to extract data from only text field, convert each of them to integer. Return only these 4 integers. Output should contain only 4 integers. Don't output any other code, docuemntation or any other text"""
+                        response = await generate_with_timeout(client, extract_coordinates_prompt)
                         response_text_coordinates = response.text.strip().splitlines()
                         print(f"LLM Response to extract co-ordinates: {response_text_coordinates}")
-                        result_2 = await session.call_tool("draw_rectangle", arguments={"x1": response_text_coordinates[0], "y1": response_text_coordinates[1], "x2": response_text_coordinates[2], "y2": response_text_coordinates[3]})
+
+                        prompt_to_determine_rectangle= f""" You have access to {tools_description}. I need you to determine name of the tool to draw a rectangle. Just return the tool name. Don't output anything else"""
+                        response = await generate_with_timeout(client, prompt_to_determine_rectangle)
+                        tool_name = response.text.strip().splitlines()
+                        print("Tool name to determine drawing of rectangle is ", tool_name)
+
+                        result_2 = await session.call_tool(tool_name[0], arguments={"x1": response_text_coordinates[0], "y1": response_text_coordinates[1], "x2": response_text_coordinates[2], "y2": response_text_coordinates[3]})
                         print(f"LLM New Response 2: {result_2}")
                         
                         draw_prompt= f"""You have access to these tools {tools_description}. I need you to determine name of the tool in order to add text in the paint application. Just return the tool name. Don't output anything else"""
